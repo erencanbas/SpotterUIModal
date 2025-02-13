@@ -10,11 +10,10 @@ import {
   Tooltip,
   Legend,
   Scale,
-  ScaleOptionsByType,
-  CartesianScaleTypeRegistry,
   CoreScaleOptions,
-  Tick,
-  ChartData
+  ChartData,
+  TooltipModel,
+  TooltipItem
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -30,12 +29,11 @@ ChartJS.register(
 );
 
 const AccuracyGraph = () => {
-// @ts-ignore
   const options = {
     responsive: true,
     maintainAspectRatio: false,
     interaction: {
-      mode: "index" as "index", 
+      mode: 'index' as const,
       intersect: false,
     },
     plugins: {
@@ -66,10 +64,18 @@ const AccuracyGraph = () => {
           size: 11,
         },
         callbacks: {
-          title: (context: any) => `${context[0].label} DAYS`, // Tooltip başlığı
-          label: (context: any) => {
-            const label = context.dataset.label || "";
-            const value = context.parsed.y;
+          title: function(
+            this: TooltipModel<"line">,
+            tooltipItems: TooltipItem<"line">[]
+          ): string {
+            return `${tooltipItems[0].label} DAYS`;
+          },
+          label: function(
+            this: TooltipModel<"line">,
+            tooltipItem: TooltipItem<"line">
+          ): string {
+            const label = tooltipItem.dataset.label || "";
+            const value = tooltipItem.parsed.y;
             return `${label}: ${value > 0 ? "-" : ""}${Math.abs(value).toFixed(1)}%`;
           },
         },
@@ -87,12 +93,11 @@ const AccuracyGraph = () => {
             family: '"JetBrains Mono", monospace',
             size: 12,
           },
-          color: "#9CA3AF",
+          color: '#9CA3AF',
           callback: function(
             this: Scale<CoreScaleOptions>,
             tickValue: string | number,
             index: number,
-            ticks: Tick[]
           ): string | number | null {
             return index % 30 === 0 ? tickValue : '';
           },
